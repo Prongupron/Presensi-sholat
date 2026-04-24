@@ -41,10 +41,13 @@ const getDisplayDate = (dateString: string) => {
   });
 };
 
+const CLASS_OPTIONS = ["X1", "X2", "XI Soshum", "XI Saintek", "XII Soshum", "XII Saintek"];
+
 export default function App() {
   const [role, setRole] = useState<'student' | 'teacher' | null>(null);
   const [studentName, setStudentName] = useState('');
   const [studentClass, setStudentClass] = useState('');
+  const [selectedClassFilter, setSelectedClassFilter] = useState('Semua Kelas');
   const [currentDate, setCurrentDate] = useState(formatDate(new Date()));
   const [entries, setEntries] = useState<PrayerEntry[]>([]);
   const [activeTab, setActiveTab] = useState<'daily' | 'history' | 'teacher'>('daily');
@@ -199,13 +202,14 @@ export default function App() {
               </div>
               <div className="space-y-2">
                  <label className="text-[10px] uppercase font-bold tracking-widest text-forest/60 ml-2">Kelas</label>
-                 <input 
-                    type="text" 
+                 <select 
                     value={studentClass}
                     onChange={(e) => setStudentClass(e.target.value)}
-                    placeholder="Contoh: 10A"
-                    className="w-full bg-parchment p-3 rounded-xl border border-forest/10 focus:outline-none focus:border-forest/40 font-medium text-sm"
-                 />
+                    className="w-full bg-parchment p-3 rounded-xl border border-forest/10 focus:outline-none focus:border-forest/40 font-medium text-sm appearance-none"
+                 >
+                    <option value="">Pilih Kelas</option>
+                    {CLASS_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
+                 </select>
               </div>
             </div>
             
@@ -410,8 +414,27 @@ export default function App() {
                </div>
 
                <div className="bg-white rounded-3xl border border-forest/10 overflow-hidden shadow-sm">
-                  <div className="p-6 bg-forest/5 border-b border-forest/10 flex justify-between items-center">
-                     <h3 className="font-serif italic text-xl">Laporan Monitoring</h3>
+                  <div className="p-6 bg-forest/5 border-b border-forest/10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                     <div>
+                        <h3 className="font-serif italic text-xl">Laporan Monitoring</h3>
+                        <div className="flex gap-2 mt-2">
+                           <button 
+                             onClick={() => setSelectedClassFilter('Semua Kelas')}
+                             className={`px-3 py-1 rounded-full text-[8px] font-bold uppercase tracking-widest transition-all ${selectedClassFilter === 'Semua Kelas' ? 'bg-forest text-white' : 'bg-white text-forest border border-forest/10'}`}
+                           >
+                             Semua
+                           </button>
+                           {CLASS_OPTIONS.map(c => (
+                             <button 
+                               key={c}
+                               onClick={() => setSelectedClassFilter(c)}
+                               className={`px-3 py-1 rounded-full text-[8px] font-bold uppercase tracking-widest transition-all ${selectedClassFilter === c ? 'bg-forest text-white' : 'bg-white text-forest border border-forest/10'}`}
+                             >
+                               {c}
+                             </button>
+                           ))}
+                        </div>
+                     </div>
                      <div className="flex gap-4">
                         <button onClick={() => changeDate(-1)} className="p-2 border border-forest/10 rounded-lg hover:bg-forest/5"><ChevronLeft className="w-4 h-4" /></button>
                         <div className="px-4 py-2 font-mono font-bold text-forest text-sm bg-white rounded-lg border border-forest/10">{currentDate}</div>
@@ -423,42 +446,48 @@ export default function App() {
                       <thead className="bg-gray-50 border-b border-gray-100 italic font-serif">
                         <tr>
                           <th className="p-6">Identitas Siswa</th>
-                          <th className="p-6">Zuhur (F/Q/B)</th>
-                          <th className="p-6">Ashar (F/Q)</th>
+                          <th className="p-6 text-center">Zuhur (F/Q/B)</th>
+                          <th className="p-6 text-center">Ashar (F/Q)</th>
                           <th className="p-6">Update Terakhir</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
-                        {Array.from(new Set(entries.map(e => e.studentName))).map(name => {
-                          const studentEntries = entries.filter(e => e.studentName === name && e.date === currentDate);
-                          const studentInfo = entries.find(e => e.studentName === name);
-                          const z = studentEntries.find(e => e.prayer === 'Zuhur');
-                          const a = studentEntries.find(e => e.prayer === 'Ashar');
-                          return (
-                            <tr key={name} className="hover:bg-gray-50 transition-colors">
-                              <td className="p-6">
-                                <div className="font-bold text-forest text-lg font-serif italic">{name}</div>
-                                <div className="text-[10px] uppercase font-bold tracking-widest text-ochre mt-1">Kelas {studentInfo?.studentClass || '-'}</div>
-                              </td>
-                              <td className="p-6">
-                                <div className="flex gap-2">
-                                  <span className={`px-2 py-1 rounded text-[10px] font-bold ${z?.fard ? 'bg-forest text-white' : 'bg-gray-100 text-gray-300'}`}>F</span>
-                                  <span className={`px-2 py-1 rounded text-[10px] font-bold ${z?.qobliyah ? 'bg-ochre text-white' : 'bg-gray-100 text-gray-300'}`}>Q</span>
-                                  <span className={`px-2 py-1 rounded text-[10px] font-bold ${z?.badiyah ? 'bg-ochre text-white' : 'bg-gray-100 text-gray-300'}`}>B</span>
-                                </div>
-                              </td>
-                              <td className="p-6">
-                                <div className="flex gap-2">
-                                  <span className={`px-2 py-1 rounded text-[10px] font-bold ${a?.fard ? 'bg-forest text-white' : 'bg-gray-100 text-gray-300'}`}>F</span>
-                                  <span className={`px-2 py-1 rounded text-[10px] font-bold ${a?.qobliyah ? 'bg-ochre text-white' : 'bg-gray-100 text-gray-300'}`}>Q</span>
-                                </div>
-                              </td>
-                              <td className="p-6 text-xs font-mono opacity-40">
-                                {studentEntries.length ? new Date(Math.max(...studentEntries.map(e => e.timestamp))).toLocaleTimeString() : '-'}
-                              </td>
-                            </tr>
-                          )
-                        })}
+                        {Array.from(new Set(entries.map(e => e.studentName)))
+                          .filter(name => {
+                            if (selectedClassFilter === 'Semua Kelas') return true;
+                            const student = entries.find(e => e.studentName === name);
+                            return student?.studentClass === selectedClassFilter;
+                          })
+                          .map(name => {
+                            const studentEntries = entries.filter(e => e.studentName === name && e.date === currentDate);
+                            const studentInfo = entries.find(e => e.studentName === name);
+                            const z = studentEntries.find(e => e.prayer === 'Zuhur');
+                            const a = studentEntries.find(e => e.prayer === 'Ashar');
+                            return (
+                              <tr key={name} className="hover:bg-gray-50 transition-colors">
+                                <td className="p-6">
+                                  <div className="font-bold text-forest text-lg font-serif italic">{name}</div>
+                                  <div className="inline-block px-2 py-0.5 bg-ochre/10 text-ochre text-[8px] font-bold rounded uppercase tracking-wider mt-1">Kelas {studentInfo?.studentClass || '-'}</div>
+                                </td>
+                                <td className="p-6">
+                                  <div className="flex gap-2 justify-center">
+                                    <span className={`w-8 h-8 flex items-center justify-center rounded font-bold text-xs ${z?.fard ? 'bg-forest text-white' : 'bg-gray-100 text-gray-300'}`}>F</span>
+                                    <span className={`w-8 h-8 flex items-center justify-center rounded font-bold text-xs ${z?.qobliyah ? 'bg-ochre text-white' : 'bg-gray-100 text-gray-300'}`}>Q</span>
+                                    <span className={`w-8 h-8 flex items-center justify-center rounded font-bold text-xs ${z?.badiyah ? 'bg-ochre text-white' : 'bg-gray-100 text-gray-300'}`}>B</span>
+                                  </div>
+                                </td>
+                                <td className="p-6">
+                                  <div className="flex gap-2 justify-center">
+                                    <span className={`w-8 h-8 flex items-center justify-center rounded font-bold text-xs ${a?.fard ? 'bg-forest text-white' : 'bg-gray-100 text-gray-300'}`}>F</span>
+                                    <span className={`w-8 h-8 flex items-center justify-center rounded font-bold text-xs ${a?.qobliyah ? 'bg-ochre text-white' : 'bg-gray-100 text-gray-300'}`}>Q</span>
+                                  </div>
+                                </td>
+                                <td className="p-6 text-xs font-mono opacity-40">
+                                  {studentEntries.length ? new Date(Math.max(...studentEntries.map(e => e.timestamp))).toLocaleTimeString() : '-'}
+                                </td>
+                              </tr>
+                            )
+                          })}
                         {Array.from(new Set(entries.map(e => e.studentName))).length === 0 && (
                           <tr>
                             <td colSpan={4} className="p-20 text-center italic opacity-30">Belum ada data masuk untuk tanggal ini</td>
