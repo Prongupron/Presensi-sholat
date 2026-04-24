@@ -1,6 +1,6 @@
 {
-  "name": "Absensi Sholat Zuhur & Ashar",
-  "description": "Aplikasi pencatatan sholat Zuhur, Ashar, dan sunnah rawatib dengan fitur rekapitulasi.",
+  "name": "SholatTrack - Guru & Siswa",
+  "description": "Aplikasi absensi sholat Zuhur dan Ashar yang terintegrasi antara Siswa dan Guru untuk pemantauan realtime.",
   "requestFramePermissions": [],
   "majorCapabilities": []
 }
